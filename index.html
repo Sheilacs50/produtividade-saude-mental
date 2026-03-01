@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b2a66" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <title>Produtividade + Saúde Mental — Sheila (PWA)</title>
+  <style>
+    :root{--bg:#0b2a66;--text:#fff;--muted:rgba(255,255,255,.82);--stroke:rgba(255,255,255,.18);--gold:#FFD700;--danger:#ef4444;--shadow:0 10px 30px rgba(0,0,0,.25);--radius:16px;--btn2:rgba(255,255,255,.12)}
+    *{box-sizing:border-box}
+    body{margin:0;padding:12px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 800px at 20% 0%, #1a4bb8 0%, var(--bg) 55%, #061a3f 100%);color:var(--text)}
+    .wrap{max-width:1300px;margin:0 auto;display:grid;gap:12px}
+    header{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--stroke);border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));box-shadow:var(--shadow)}
+    .title h1{margin:0;font-size:18px}.title p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button{border:1px solid var(--stroke);background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:800;transition:.15s transform ease}
+    button:hover{transform:translateY(-1px)}
+    button.secondary{background:var(--btn2)}
+    button.gold{border-color:rgba(255,215,0,.35);background:linear-gradient(180deg, rgba(255,215,0,.25), rgba(255,215,0,.12))}
+    button.danger{border-color:rgba(239,68,68,.4);background:linear-gradient(180deg, rgba(239,68,68,.25), rgba(239,68,68,.12))}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--stroke);border-radius:var(--radius);background:rgba(0,0,0,.10);box-shadow:var(--shadow);position:sticky;top:8px;z-index:10;backdrop-filter:blur(10px)}
+    .tabBtn.active{border-color:rgba(255,215,0,.35);box-shadow:0 0 0 2px rgba(255,215,0,.12) inset}
+    .card{padding:14px;border:1px solid var(--stroke);border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));box-shadow:var(--shadow)}
+    .card h2{margin:0 0 10px;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .sub{color:var(--muted);font-size:12px;margin-top:4px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}
+    label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
+    input,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,.18);color:var(--text);outline:none}
+    textarea{min-height:90px;resize:vertical}
+    .grid2{display:grid;gap:12px;grid-template-columns:1.05fr .95fr}@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+    .sep{height:1px;background:var(--stroke);margin:12px 0}
+    .moodRow{display:flex;gap:8px;flex-wrap:wrap}
+    .moodBtn{padding:10px 12px;border-radius:14px;font-size:16px;border:1px solid var(--stroke);background:rgba(0,0,0,.14);display:flex;align-items:center;gap:6px}
+    .mLabel{font-size:11px;margin-left:6px;color:var(--muted);font-weight:900}
+    .moodBtn.active{outline:2px solid rgba(255,215,0,.35);background:rgba(255,215,0,.12)}
+    .item{border:1px solid var(--stroke);border-radius:14px;padding:10px;background:rgba(0,0,0,.14);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .item b{display:block;font-size:13px}.item .meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.08);white-space:nowrap}
+    .hide{display:none}
+    .timerBox{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}@media(max-width:700px){.timerBox{grid-template-columns:1fr}}
+    .bigTime{font-size:42px;font-weight:900;letter-spacing:1px;text-align:center;padding:14px;border-radius:16px;border:1px solid var(--stroke);background:rgba(0,0,0,.16)}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid var(--stroke);background:rgba(0,0,0,.12);font-weight:900;cursor:pointer;user-select:none}
+    .pill.active{outline:2px solid rgba(255,215,0,.35);background:rgba(255,215,0,.12)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1>Produtividade + Saúde Mental — Sheila</h1>
+      <p id="todayLine">Carregando…</p>
+    </div>
+    <div class="actions">
+      <button class="gold" id="btnInstall" disabled>📲 Instalar</button>
+      <button id="btnShare" class="secondary">🔗 Compartilhar</button>
+      <button id="btnNotif" class="secondary">🔔 Notificações</button>
+      <button id="btnExport" class="secondary">⬇️ Backup</button>
+      <button id="btnImport" class="secondary">⬆️ Restaurar</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tabBtn gold active" data-tab="hoje">📌 Hoje</button>
+    <button class="tabBtn secondary" data-tab="prod">✅ Produtividade</button>
+    <button class="tabBtn secondary" data-tab="saude">🧠 Saúde mental</button>
+    <button class="tabBtn secondary" data-tab="cal">📅 Calendário</button>
+    <button class="tabBtn secondary" data-tab="alarmes">⏰ Alarmes</button>
+    <button class="tabBtn secondary" data-tab="dash">📊 Dashboard</button>
+    <button class="tabBtn secondary" data-tab="perfil">👤 Perfil</button>
+  </nav>
+
+  <section class="card" id="tab-hoje">
+    <h2>📌 Hoje • Check-in rápido</h2>
+    <div class="grid2">
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧭 Como estou agora?</h2>
+        <label>🙂 Humor</label>
+        <div class="moodRow" id="moodRow">
+          <button class="moodBtn" data-mood="Muito bem">😄<span class="mLabel">Muito bem</span></button>
+          <button class="moodBtn" data-mood="Bem">🙂<span class="mLabel">Bem</span></button>
+          <button class="moodBtn" data-mood="Neutra">😐<span class="mLabel">Neutra</span></button>
+          <button class="moodBtn" data-mood="Cansada">🥱<span class="mLabel">Cansada</span></button>
+          <button class="moodBtn" data-mood="Ansiosa">😰<span class="mLabel">Ansiosa</span></button>
+          <button class="moodBtn" data-mood="Triste">😔<span class="mLabel">Triste</span></button>
+          <button class="moodBtn" data-mood="Sobrecarregada">😵‍💫<span class="mLabel">Sobrecarregada</span></button>
+          <button class="moodBtn" data-mood="Determinada">💪<span class="mLabel">Determinada</span></button>
+          <button class="moodBtn" data-mood="Grata">🙏<span class="mLabel">Grata</span></button>
+        </div>
+
+        <div class="row">
+          <div><label>Energia (0–10)</label><input id="energy" type="number" min="0" max="10" step="1" placeholder="6"></div>
+          <div><label>Estresse (0–10)</label><input id="stress" type="number" min="0" max="10" step="1" placeholder="4"></div>
+        </div>
+        <div class="row">
+          <div><label>Foco (0–10)</label><input id="focus" type="number" min="0" max="10" step="1" placeholder="7"></div>
+          <div><label>Horas de sono</label><input id="sleep" type="number" min="0" max="24" step="0.5" placeholder="7.5"></div>
+        </div>
+
+        <div class="sep"></div>
+        <h2>💧 & 🚶 Autocuidado</h2>
+        <div class="row">
+          <div><label>Água (copos)</label><input id="water" type="number" min="0" step="1" placeholder="6"></div>
+          <div><label>Movimento (min)</label><input id="move" type="number" min="0" step="5" placeholder="20"></div>
+        </div>
+
+        <div class="row" style="align-items:flex-end">
+          <div><label>Uma coisa boa do dia</label><input id="goodThing" placeholder="Ex.: consegui caminhar 10 min"></div>
+          <div style="min-width:240px">
+            <button class="gold" id="saveToday" style="width:100%">💾 Salvar Check-in</button>
+            <div class="sub" id="saveHint">Salvando…</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <h2>🎯 Top 3 do dia</h2>
+        <div class="row">
+          <div><label>Prioridade 1</label><input id="top1" placeholder="Ex.: estudar 30 min"></div>
+          <div><label>Prioridade 2</label><input id="top2" placeholder="Ex.: banho + água"></div>
+          <div><label>Prioridade 3</label><input id="top3" placeholder="Ex.: organizar 10 min"></div>
+        </div>
+      </div>
+
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧘 Ferramentas rápidas</h2>
+        <div class="item">
+          <div><b>Respiração 4–7–8 (2 min)</b><div class="meta" id="breathHint">Toque em iniciar e acompanhe o ritmo.</div></div>
+          <button class="gold" id="btnBreath">▶ Iniciar</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="item">
+          <div><b>Aterramento 5–4–3–2–1</b><div class="meta">5 ver • 4 tocar • 3 ouvir • 2 cheirar • 1 provar</div></div>
+          <button class="secondary" id="btnGround">Abrir</button>
+        </div>
+
+        <div class="sep"></div>
+        <div class="item">
+          <div><b>Mini diário (2 linhas)</b><div class="meta">“O que eu sinto?” + “O que eu preciso?”</div></div>
+          <button class="secondary" id="btnMiniJournal">Abrir</button>
+        </div>
+
+        <div class="sep"></div>
+        <h2>📖 Versículo do dia</h2>
+        <div class="item">
+          <div><b id="verseRef">—</b><div class="meta" id="verseText">—</div></div>
+          <div class="badge" id="verseDayTag">Hoje</div>
+        </div>
+
+        <div class="sep"></div>
+        <h2>🧷 Nota importante</h2>
+        <div class="sub">Este planner é para organização e autocuidado. Em risco imediato, busque ajuda urgente: <b>CVV 188</b> (24h) ou <b>192 (SAMU)</b> / <b>190</b>.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hide" id="tab-prod"><h2>✅ Produtividade • Tarefas + Pomodoro</h2>
+    <div class="grid2">
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧠 Pomodoro</h2>
+        <div class="row">
+          <div><label>Foco</label><input id="pomoTopic" placeholder="Ex.: estudos, casa, trabalho…"></div>
+          <div><label>Duração (min)</label><input id="pomoMin" type="number" min="5" step="5" placeholder="25"></div>
+        </div>
+        <div class="timerBox">
+          <div class="bigTime" id="timeLeft">25:00</div>
+          <div class="card" style="background: rgba(0,0,0,.12)">
+            <div class="row">
+              <button class="gold" id="btnStart">▶ Iniciar</button>
+              <button class="secondary" id="btnPause">⏸ Pausar</button>
+              <button class="danger" id="btnReset">⟲ Reset</button>
+            </div>
+            <div class="sep"></div>
+            <div class="row">
+              <button class="secondary" id="btnShort">☕ Pausa 5</button>
+              <button class="secondary" id="btnLong">🛌 Pausa 15</button>
+            </div>
+            <div class="sub">Instalar como app melhora notificações.</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <h2>🗂️ Tarefas (com +)</h2>
+        <div class="row"><input id="taskText" placeholder="Ex.: tomar água • banho • revisar aula" /><button class="gold" id="btnAddTask">＋</button></div>
+        <div class="sub">Toque para marcar concluída.</div>
+        <div id="tasksList" style="display:grid; gap:8px; margin-top:10px"></div>
+      </div>
+
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧩 Hábitos do dia</h2>
+        <div class="row" id="habitsRow" style="flex-wrap:wrap; gap:10px">
+          <div class="pill" data-h="agua">💧 Água</div>
+          <div class="pill" data-h="mov">🚶 Movimento</div>
+          <div class="pill" data-h="sol">☀️ Sol</div>
+          <div class="pill" data-h="oracao">🙏 Oração</div>
+          <div class="pill" data-h="arrum">🧹 Arrumar 10min</div>
+          <div class="pill" data-h="pausa">🧘 Pausa</div>
+        </div>
+
+        <div class="sep"></div>
+        <h2>📝 Anotações</h2>
+        <textarea id="notes" placeholder="O que preciso lembrar?"></textarea>
+
+        <div class="sep"></div>
+        <h2>📔 Diário</h2>
+        <textarea id="diary" placeholder="Escreva livremente (offline)"></textarea>
+
+        <div class="row" style="margin-top:8px">
+          <button id="btnDiaryToday" class="secondary">📌 Inserir data</button>
+          <button id="btnClearDiary" class="danger">🧹 Limpar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hide" id="tab-saude"><h2>🧠 Saúde mental • Plano de cuidado</h2>
+    <div class="grid2">
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧩 O que me ajuda (lista)</h2>
+        <div class="row"><input id="copingText" placeholder="Ex.: banho, oração, música, caminhar…" /><button class="gold" id="btnAddCoping">＋</button></div>
+        <div id="copingList" style="display:grid; gap:8px; margin-top:10px"></div>
+
+        <div class="sep"></div>
+        <h2>🔎 Gatilhos e sinais</h2>
+        <label>Gatilhos</label><textarea id="triggers" placeholder="Ex.: pouco sono, discussões..."></textarea>
+        <label>Sinais</label><textarea id="signals" placeholder="Ex.: irritação, isolamento..."></textarea>
+
+        <div class="sep"></div>
+        <h2>🧷 Contatos de apoio</h2>
+        <div class="row">
+          <div><label>Contato 1</label><input id="support1" placeholder="Nome + telefone" /></div>
+          <div><label>Contato 2</label><input id="support2" placeholder="Nome + telefone" /></div>
+        </div>
+      </div>
+
+      <div class="card" style="background: rgba(0,0,0,.10)">
+        <h2>🧘 Aterramento 5–4–3–2–1</h2>
+        <div class="sub">5 ver • 4 tocar • 3 ouvir • 2 cheirar • 1 provar.</div>
+        <div class="sep"></div>
+
+        <h2>📝 Mini diário</h2>
+        <label>O que eu sinto?</label><textarea id="mjFeel"></textarea>
+        <label>O que eu preciso?</label><textarea id="mjNeed"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="gold" id="btnSaveMiniJournal">💾 Salvar</button>
+          <button class="secondary" id="btnCopyMiniJournal">📋 Copiar</button>
+        </div>
+
+        <div class="sep"></div>
+        <h2>🌿 “Hoje eu cuido de mim”</h2>
+        <div class="row" style="flex-wrap:wrap; gap:10px" id="selfCareRow">
+          <div class="pill" data-s="banho">🚿 Banho</div>
+          <div class="pill" data-s="comida">🍽️ Alimentação</div>
+          <div class="pill" data-s="agua">💧 Água</div>
+          <div class="pill" data-s="sol">☀️ Sol</div>
+          <div class="pill" data-s="resp">🫁 Respiração</div>
+          <div class="pill" data-s="oracao">🙏 Oração</div>
+          <div class="pill" data-s="sono">😴 Sono</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hide" id="tab-cal"><h2>📅 Calendário</h2>
+    <div class="row"><div><label>Data</label><input id="calDate" type="date" /></div><div><label>Check-in</label><input id="calMood" disabled /></div></div>
+    <div class="row"><div><label>Notas</label><textarea id="calNotes"></textarea></div><div><label>Difícil</label><textarea id="calHard"></textarea></div></div>
+    <button class="gold" id="btnSaveCal">💾 Salvar dia</button>
+  </section>
+
+  <section class="card hide" id="tab-alarmes"><h2>⏰ Alarmes</h2>
+    <div class="row"><div><label>Título</label><input id="alarmTitle" /></div><div><label>Data e hora</label><input id="alarmWhen" type="datetime-local" /></div></div>
+    <div class="row"><button id="btnAddAlarm" class="gold">➕ Criar</button><button id="btnTestNotif" class="secondary">🔔 Testar</button><button id="btnAddToCalendar" class="secondary">📅 Agenda</button></div>
+    <div class="sep"></div><div id="alarmsList" style="display:grid; gap:8px"></div>
+  </section>
+
+  <section class="card hide" id="tab-dash"><h2>📊 Dashboard</h2>
+    <div class="row">
+      <div class="item"><div><b>Hoje</b><div class="meta"><span id="dashMood">—</span> • energia <span id="dashEnergy">—</span> • estresse <span id="dashStress">—</span></div></div><div class="badge" id="dashTodayStatus">—</div></div>
+      <div class="item"><div><b>7 dias</b><div class="meta">check-ins: <span id="dash7">0</span> • hábitos: <span id="dashHab">0</span></div></div><div class="badge">Consistência</div></div>
+    </div>
+    <div class="row">
+      <div class="item"><div><b>Média sono (7 dias)</b><div class="meta"><span id="dashSleepAvg">0</span> h</div></div><div class="badge">Recuperação</div></div>
+      <div class="item"><div><b>Pomodoros (7 dias)</b><div class="meta"><span id="dashPomo7">0</span> sessões</div></div><div class="badge">Foco</div></div>
+    </div>
+    <div class="sep"></div>
+    <h2>🌿 Metas</h2>
+    <div class="row"><div><label>Água</label><input id="gWater" type="number" /></div><div><label>Movimento</label><input id="gMove" type="number" /></div><div><label>Sono</label><input id="gSleep" type="number" step="0.5"/></div></div>
+    <div class="sub" id="goalLine">—</div>
+  </section>
+
+  <section class="card hide" id="tab-perfil"><h2>👤 Perfil</h2>
+    <div class="row"><div><label>Nome</label><input id="pName" /></div><div><label>Rotina ideal</label><input id="pRoutine" /></div></div>
+    <div class="row"><div><label>Prioridade</label><input id="pGoal" /></div><div><label>Lugar de calma</label><input id="pCalm" /></div></div>
+    <div class="sep"></div><button class="danger" id="btnResetAll">🧨 Zerar tudo</button>
+  </section>
+
+  <footer class="card"><div class="sub">✅ Offline • 📲 Instalar • 🔔 Agenda • 🧠 Autocuidado • ✅ Tarefas</div></footer>
+</div>
+
+<script>
+const LS_KEY="planner_prod_saude_v1";
+const state={profile:{name:"Sheila",routine:"",goal:"",calm:""},goals:{water:8,move:20,sleep:7},days:{},tasks:{},coping:[],alarms:[],notifEnabled:false,diaryGlobal:"",pomo:{topic:"",minutes:25,running:false,endsAt:null,pausedLeft:null,finishedCount:{}}};
+
+function pad(n){return String(n).padStart(2,"0")}
+function toYMD(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function escapeHtml(s){return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function v(id){return document.getElementById(id).value}
+function load(){try{const raw=localStorage.getItem(LS_KEY);if(raw)Object.assign(state,JSON.parse(raw))}catch(e){}}
+function save(){localStorage.setItem(LS_KEY,JSON.stringify(state));const el=document.getElementById("saveHint");if(el)el.innerText="Salvo ✅ "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
+function ensureDay(ymd){state.days[ymd]=state.days[ymd]||{habits:{},selfCare:{},miniJournal:{feel:"",need:""}};state.tasks[ymd]=state.tasks[ymd]||[];return state.days[ymd]}
+
+const VERSES=[{ref:"Salmos 23:1",text:"O Senhor é o meu pastor; nada me faltará."},{ref:"Isaías 41:10",text:"Não tema, pois eu estou com você; não tenha medo, pois eu sou o seu Deus."},{ref:"Mateus 11:28",text:"Venham a mim, todos os que estão cansados e sobrecarregados, e eu lhes darei descanso."},{ref:"Filipenses 4:6-7",text:"Não andem ansiosos por coisa alguma… a paz de Deus guardará o coração e a mente."},{ref:"Salmos 46:10",text:"Aquietem-se e saibam que eu sou Deus."},{ref:"Provérbios 3:5",text:"Confie no Senhor de todo o seu coração."},{ref:"João 14:27",text:"Deixo com vocês a paz; a minha paz lhes dou."},{ref:"Salmos 121:2",text:"O meu socorro vem do Senhor, que fez os céus e a terra."}]
+function dayOfYear(d){const start=new Date(d.getFullYear(),0,0);return Math.floor((d-start)/86400000)}
+function renderTodayLine(){const now=new Date();document.getElementById("todayLine").innerText=now.toLocaleDateString("pt-BR",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
+function renderVerse(){const now=new Date();const idx=dayOfYear(now)%VERSES.length;const vv=VERSES[idx];document.getElementById("verseRef").innerText=vv.ref;document.getElementById("verseText").innerText=vv.text;document.getElementById("verseDayTag").innerText=toYMD(now)}
+
+function setTab(name){
+  document.querySelectorAll(".tabBtn").forEach(b=>{
+    b.classList.toggle("active",b.dataset.tab===name);
+    b.classList.toggle("gold",b.dataset.tab===name);
+    b.classList.toggle("secondary",b.dataset.tab!==name);
+  });
+  ["hoje","prod","saude","cal","alarmes","dash","perfil"].forEach(t=>document.getElementById("tab-"+t).classList.toggle("hide",t!==name));
+}
+document.getElementById("tabs").addEventListener("click",(e)=>{const btn=e.target.closest(".tabBtn");if(btn)setTab(btn.dataset.tab)})
+
+async function ensureSW(){if(!("serviceWorker"in navigator))return null;try{return await navigator.serviceWorker.register("./sw.js")}catch(e){return null}}
+async function requestNotif(){if(!("Notification"in window)){alert("Sem suporte.");return false}const perm=await Notification.requestPermission();state.notifEnabled=(perm==="granted");save();toast(state.notifEnabled?"Notificações ativadas ✅":"Permissão negada.");return state.notifEnabled}
+async function notify(title,body){
+  const reg=await ensureSW();
+  if(reg&&state.notifEnabled&&("showNotification"in reg)){
+    try{await reg.showNotification(title,{body,icon:"./icons/icon-192.png",badge:"./icons/icon-192.png",vibrate:[120,60,120],tag:"planner-prod-saude",data:{url:"./"}});return}catch(e){}
+  }
+  if(state.notifEnabled&&("Notification"in window)){try{new Notification(title,{body,icon:"./icons/icon-192.png"});return}catch(e){}}
+  alert(title+"\n\n"+body);
+}
+function toast(msg){const p=document.createElement("div");p.style.position="fixed";p.style.bottom="14px";p.style.left="50%";p.style.transform="translateX(-50%)";p.style.padding="10px 12px";p.style.border="1px solid rgba(255,255,255,.18)";p.style.borderRadius="14px";p.style.background="rgba(0,0,0,.45)";p.style.backdropFilter="blur(8px)";p.style.zIndex="9999";p.innerText=msg;document.body.appendChild(p);setTimeout(()=>p.remove(),2200)}
+
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();deferredPrompt=e;const btn=document.getElementById("btnInstall");btn.disabled=false;btn.innerText="📲 Instalar"});
+document.getElementById("btnInstall").addEventListener("click",async()=>{if(!deferredPrompt){alert("Chrome ⋮ > Adicionar à tela inicial.");return}deferredPrompt.prompt();const res=await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById("btnInstall").disabled=true;toast(res.outcome==="accepted"?"Instalado ✅":"Cancelado")});
+
+async function shareApp(){
+  const ymd=toYMD(new Date());const d=state.days[ymd]||{};
+  const txt=`Produtividade + Saúde Mental — ${state.profile.name||"Meu"} ✨\n\nDia: ${ymd}\nHumor: ${d.mood||"—"} • Energia: ${d.energy??"—"} • Estresse: ${d.stress??"—"}\nSono: ${d.sleep??"—"}h • Água: ${d.water??"—"} • Movimento: ${d.move??"—"}min\n\nUma coisa boa: ${d.goodThing||"—"}\n\nVersículo: ${document.getElementById("verseRef").innerText}\n"${document.getElementById("verseText").innerText}"`;
+  if(navigator.share){try{await navigator.share({title:"Planner Prod+Saúde",text:txt});return}catch(e){}}
+  await navigator.clipboard.writeText(txt);toast("Texto copiado ✅");
+}
+function exportBackup(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`backup-prod-saude-${toYMD(new Date())}.json`;a.click();URL.revokeObjectURL(url)}
+function importBackup(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json";inp.onchange=async()=>{const file=inp.files?.[0];if(!file)return;const txt=await file.text();try{Object.assign(state,JSON.parse(txt));save();location.reload()}catch(e){alert("Backup inválido.")}};inp.click()}
+
+function loadTodayUI(){
+  const ymd=toYMD(new Date());const d=ensureDay(ymd);
+  document.querySelectorAll("#moodRow .moodBtn").forEach(b=>b.classList.toggle("active",b.dataset.mood=== (d.mood||"")));
+  ["energy","stress","focus","sleep","water","move"].forEach(id=>{document.getElementById(id).value=(d[id]??"")});
+  document.getElementById("goodThing").value=d.goodThing||"";
+  ["top1","top2","top3"].forEach(id=>document.getElementById(id).value=d[id]||"");
+  document.querySelectorAll("[data-h]").forEach(p=>p.classList.toggle("active",!!d.habits?.[p.dataset.h]));
+  document.querySelectorAll("[data-s]").forEach(p=>p.classList.toggle("active",!!d.selfCare?.[p.dataset.s]));
+  document.getElementById("mjFeel").value=d.miniJournal?.feel||"";
+  document.getElementById("mjNeed").value=d.miniJournal?.need||"";
+  document.getElementById("calDate").value=ymd;
+  document.getElementById("calMood").value=d.mood||"—";
+  document.getElementById("calNotes").value=d.calNotes||"";
+  document.getElementById("calHard").value=d.calHard||"";
+  document.getElementById("notes").value=d.notes||"";
+  document.getElementById("diary").value=state.diaryGlobal||"";
+}
+
+function saveToday(){
+  const ymd=toYMD(new Date());const d=ensureDay(ymd);
+  const moodBtn=[...document.querySelectorAll("#moodRow .moodBtn")].find(b=>b.classList.contains("active"));
+  d.mood=moodBtn?moodBtn.dataset.mood:"";
+  const num=(id,def=null)=>{const val=document.getElementById(id).value;if(val===""||val==null)return def;const n=Number(val);return isNaN(n)?def:n};
+  d.energy=num("energy");d.stress=num("stress");d.focus=num("focus");d.sleep=num("sleep");d.water=num("water");d.move=num("move");
+  d.goodThing=document.getElementById("goodThing").value.trim();
+  d.top1=document.getElementById("top1").value.trim();d.top2=document.getElementById("top2").value.trim();d.top3=document.getElementById("top3").value.trim();
+  d.notes=document.getElementById("notes").value.trim();
+  state.diaryGlobal=document.getElementById("diary").value;
+  d.updatedAt=new Date().toISOString();
+  save();document.getElementById("calMood").value=d.mood||"—";renderDashboard();
+}
+
+let breathTimer=null;
+function startBreathing(){
+  const hint=document.getElementById("breathHint");
+  const phases=[{t:"Inspire",s:4},{t:"Segure",s:7},{t:"Expire",s:8}];
+  let total=2, idx=0, left=phases[0].s, cycle=1;
+  hint.innerText=`${phases[0].t} • ${left}s (ciclo ${cycle}/${total})`;
+  if(breathTimer)clearInterval(breathTimer);
+  breathTimer=setInterval(async()=>{
+    left--;
+    if(left<=0){
+      idx++;
+      if(idx>=phases.length){idx=0;cycle++;if(cycle>total){clearInterval(breathTimer);breathTimer=null;hint.innerText="Finalizado ✅";await notify("🫁 Respiração concluída","Muito bem. Volte aos poucos.");return}}
+      left=phases[idx].s;
+    }
+    hint.innerText=`${phases[idx].t} • ${left}s (ciclo ${cycle}/${total})`;
+  },1000);
+}
+
+function renderTasks(){
+  const ymd=toYMD(new Date());const arr=state.tasks[ymd]||[];const el=document.getElementById("tasksList");
+  el.innerHTML=arr.length?"":`<div class="sub">Sem tarefas. Adicione com +</div>`;
+  arr.forEach((t,idx)=>{const div=document.createElement("div");div.className="item";div.innerHTML=`<div><b>${t.done?"✅ ":""}${escapeHtml(t.text)}</b><div class="meta">${new Date(t.createdAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div></div><div class="row" style="gap:8px;flex:0"><button class="secondary" data-tog="${idx}">${t.done?"↩️":"✔️"}</button><button class="danger" data-del="${idx}">🗑️</button></div>`;el.appendChild(div);});
+  el.querySelectorAll("[data-tog]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.tog);arr[i].done=!arr[i].done;save();renderTasks();renderDashboard()});
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.del);arr.splice(i,1);save();renderTasks();renderDashboard()});
+}
+function addTask(){
+  const ymd=toYMD(new Date());const txt=document.getElementById("taskText").value.trim();if(!txt)return;
+  state.tasks[ymd]=state.tasks[ymd]||[];state.tasks[ymd].unshift({text:txt,done:false,createdAt:new Date().toISOString()});
+  document.getElementById("taskText").value="";save();renderTasks();renderDashboard();
+}
+
+function renderCoping(){
+  const el=document.getElementById("copingList");
+  el.innerHTML=state.coping.length?"":`<div class="sub">Adicione coisas que te ajudam (com +).</div>`;
+  state.coping.forEach((t,idx)=>{const div=document.createElement("div");div.className="item";div.innerHTML=`<div><b>${escapeHtml(t)}</b><div class="meta">toque para copiar</div></div><div class="row" style="gap:8px;flex:0"><button class="secondary" data-copy="${idx}">📋</button><button class="danger" data-del="${idx}">🗑️</button></div>`;el.appendChild(div);});
+  el.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{await navigator.clipboard.writeText(state.coping[Number(b.dataset.copy)]);toast("Copiado ✅")});
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{state.coping.splice(Number(b.dataset.del),1);save();renderCoping()});
+}
+function addCoping(){const txt=document.getElementById("copingText").value.trim();if(!txt)return;state.coping.unshift(txt);document.getElementById("copingText").value="";save();renderCoping()}
+
+function saveMiniJournal(){
+  const ymd=toYMD(new Date());const d=ensureDay(ymd);
+  d.miniJournal=d.miniJournal||{feel:"",need:""};
+  d.miniJournal.feel=document.getElementById("mjFeel").value.trim();
+  d.miniJournal.need=document.getElementById("mjNeed").value.trim();
+  save();toast("Mini diário salvo ✅");
+}
+async function copyMiniJournal(){
+  const feel=document.getElementById("mjFeel").value.trim();
+  const need=document.getElementById("mjNeed").value.trim();
+  await navigator.clipboard.writeText(`Mini diário\n\nO que eu sinto:\n${feel||"—"}\n\nO que eu preciso:\n${need||"—"}`);
+  toast("Copiado ✅");
+}
+
+function togglePill(setName,key){
+  const ymd=toYMD(new Date());const d=ensureDay(ymd);
+  d[setName]=d[setName]||{};d[setName][key]=!d[setName][key];
+  save();renderDashboard();
+}
+
+function loadCal(ymd){const d=ensureDay(ymd);document.getElementById("calMood").value=d.mood||"—";document.getElementById("calNotes").value=d.calNotes||"";document.getElementById("calHard").value=d.calHard||""}
+function saveCal(){
+  const ymd=document.getElementById("calDate").value;if(!ymd){alert("Escolha uma data.");return}
+  const d=ensureDay(ymd);d.calNotes=document.getElementById("calNotes").value.trim();d.calHard=document.getElementById("calHard").value.trim();d.updatedAt=new Date().toISOString();
+  save();toast("Dia salvo ✅");renderDashboard();
+}
+
+function uuid(){return Math.random().toString(16).slice(2)+"-"+Date.now().toString(16)}
+function addAlarm(){
+  const title=document.getElementById("alarmTitle").value.trim()||"Lembrete";
+  const whenVal=document.getElementById("alarmWhen").value;if(!whenVal){alert("Escolha data e hora.");return}
+  const when=new Date(whenVal);if(isNaN(when.getTime())){alert("Data/hora inválida.");return}
+  state.alarms.push({id:uuid(),title,whenISO:when.toISOString(),createdAt:new Date().toISOString()});
+  save();renderAlarms();toast("Alarme criado ✅");
+}
+function removeAlarm(id){state.alarms=state.alarms.filter(a=>a.id!==id);save();renderAlarms()}
+async function fireAlarm(id,manual=false){
+  const a=state.alarms.find(x=>x.id===id);if(!a)return;
+  try{const snd=document.getElementById("alarmSound");if(snd){snd.currentTime=0;await snd.play()}if(navigator.vibrate)navigator.vibrate([200,80,200,80,400])}catch(e){}
+  await notify("⏰ Lembrete",a.title);a.firedAt=new Date().toISOString();save();renderAlarms();if(manual)toast("Enviado ✅");
+}
+function renderAlarms(){
+  const el=document.getElementById("alarmsList");el.innerHTML="";
+  const now=Date.now();const sorted=[...state.alarms].sort((a,b)=>new Date(a.whenISO)-new Date(b.whenISO));
+  if(!sorted.length){el.innerHTML=`<div class="sub">Sem alarmes. Crie um acima.</div>`;return}
+  sorted.forEach(a=>{
+    const when=new Date(a.whenISO);const fired=!!a.firedAt;const isPast=when.getTime()<now&&!fired;
+    const div=document.createElement("div");div.className="item";
+    div.innerHTML=`<div><b>${escapeHtml(a.title)}</b><div class="meta">${when.toLocaleString("pt-BR")} ${fired?"• disparado ✅":(isPast?"• atrasado ⚠️":"")}</div></div><div class="row" style="gap:8px;flex:0"><button class="secondary" data-fire="${a.id}">🔔</button><button class="danger" data-del="${a.id}">🗑️</button></div>`;
+    el.appendChild(div);
+  });
+  el.querySelectorAll("[data-del]").forEach(btn=>btn.onclick=()=>removeAlarm(btn.dataset.del));
+  el.querySelectorAll("[data-fire]").forEach(btn=>btn.onclick=()=>fireAlarm(btn.dataset.fire,true));
+}
+function alarmWatcher(){setInterval(async()=>{const now=Date.now();for(const a of state.alarms){if(a.firedAt)continue;const when=new Date(a.whenISO).getTime();if(now>=when)await fireAlarm(a.id,false)}},20000)}
+function addToGoogleCalendar(){
+  const title=encodeURIComponent(document.getElementById("alarmTitle").value.trim()||"Lembrete");
+  const whenVal=document.getElementById("alarmWhen").value;if(!whenVal){alert("Escolha data e hora.");return}
+  const start=new Date(whenVal);const end=new Date(start.getTime()+60*60*1000);
+  const fmt=(d)=>d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent("Lembrete criado no Planner Prod+Saúde")}`;
+  window.open(url,"_blank");
+}
+
+let tickHandle=null;
+function fmtTime(sec){sec=Math.max(0,Math.floor(sec));const m=Math.floor(sec/60),s=sec%60;return `${pad(m)}:${pad(s)}`}
+function setTimeDisplay(sec){document.getElementById("timeLeft").innerText=fmtTime(sec)}
+function getPomoLeftSeconds(){if(state.pomo.running&&state.pomo.endsAt)return (new Date(state.pomo.endsAt).getTime()-Date.now())/1000;if(state.pomo.pausedLeft!=null)return state.pomo.pausedLeft;return (Number(state.pomo.minutes||25)*60)}
+function pomoLoadUI(){document.getElementById("pomoTopic").value=state.pomo.topic||"";document.getElementById("pomoMin").value=state.pomo.minutes??25;setTimeDisplay(getPomoLeftSeconds())}
+function pomoStart(){const topic=v("pomoTopic").trim();const min=Number(v("pomoMin")||25);state.pomo.topic=topic;state.pomo.minutes=min;const left=getPomoLeftSeconds();state.pomo.running=true;state.pomo.pausedLeft=null;state.pomo.endsAt=new Date(Date.now()+left*1000).toISOString();save();pomoTick();toast("Pomodoro iniciado ✅")}
+function pomoPause(){if(!state.pomo.running)return;const left=getPomoLeftSeconds();state.pomo.running=false;state.pomo.endsAt=null;state.pomo.pausedLeft=Math.max(0,Math.floor(left));save();pomoTick();toast("Pausado ⏸")}
+function pomoReset(){state.pomo.running=false;state.pomo.endsAt=null;state.pomo.pausedLeft=null;save();pomoTick();toast("Reset ⟲")}
+async function pomoFinish(){state.pomo.running=false;state.pomo.endsAt=null;state.pomo.pausedLeft=null;const ymd=toYMD(new Date());state.pomo.finishedCount=state.pomo.finishedCount||{};state.pomo.finishedCount[ymd]=(state.pomo.finishedCount[ymd]||0)+1;save();pomoTick();renderDashboard();await notify("✅ Pomodoro finalizado!", state.pomo.topic?`Sessão: ${state.pomo.topic}`:"Hora de pausar.")}
+function pomoTick(){if(tickHandle)clearInterval(tickHandle);const update=async()=>{const left=getPomoLeftSeconds();setTimeDisplay(left);if(state.pomo.running&&left<=0)await pomoFinish()};update();tickHandle=setInterval(update,1000)}
+function setPomoMinutes(min){document.getElementById("pomoMin").value=min;state.pomo.minutes=min;state.pomo.running=false;state.pomo.endsAt=null;state.pomo.pausedLeft=null;save();setTimeDisplay(min*60)}
+
+function lastNDays(n){const out=[];const now=new Date();for(let i=0;i<n;i++){const d=new Date(now);d.setDate(now.getDate()-i);out.push(toYMD(d))}return out}
+function renderDashboard(){
+  const today=toYMD(new Date());const d=state.days[today]||{};
+  document.getElementById("dashMood").innerText=d.mood||"—";
+  document.getElementById("dashEnergy").innerText=(d.energy??"—");
+  document.getElementById("dashStress").innerText=(d.stress??"—");
+  const g=state.goals||{};
+  const waterOk=(d.water??0)>=(g.water??0)&&(g.water??0)>0;
+  const moveOk=(d.move??0)>=(g.move??0)&&(g.move??0)>0;
+  const sleepOk=(d.sleep??0)>=(g.sleep??0)&&(g.sleep??0)>0;
+  const score=[waterOk,moveOk,sleepOk].filter(Boolean).length;
+  document.getElementById("dashTodayStatus").innerText = score>=2 ? "Bem cuidado ✅" : (score===1 ? "Quase lá" : "—");
+  const days7=lastNDays(7);
+  const checkins=days7.filter(k => (state.days[k]?.mood || state.days[k]?.energy!=null)).length;
+  document.getElementById("dash7").innerText=checkins;
+  let hab=0,sleepSum=0,sleepN=0,pomo7=0;
+  for(const k of days7){
+    const x=state.days[k]; if(!x) continue;
+    hab += Object.values(x.habits||{}).filter(Boolean).length;
+    if(x.sleep!=null){sleepSum+=Number(x.sleep||0);sleepN++;}
+    pomo7 += (state.pomo.finishedCount?.[k]||0);
+  }
+  document.getElementById("dashHab").innerText=hab;
+  document.getElementById("dashSleepAvg").innerText=sleepN?(sleepSum/sleepN).toFixed(1):"0";
+  document.getElementById("dashPomo7").innerText=pomo7;
+  document.getElementById("gWater").value=state.goals.water??8;
+  document.getElementById("gMove").value=state.goals.move??20;
+  document.getElementById("gSleep").value=state.goals.sleep??7;
+  document.getElementById("goalLine").innerText=`Metas: água ${g.water} • movimento ${g.move}min • sono ${g.sleep}h`;
+}
+
+document.getElementById("btnShare").onclick=shareApp;
+document.getElementById("btnExport").onclick=exportBackup;
+document.getElementById("btnImport").onclick=importBackup;
+document.getElementById("btnNotif").onclick=async()=>{await ensureSW();await requestNotif();};
+
+document.getElementById("saveToday").onclick=saveToday;
+["energy","stress","focus","sleep","water","move","goodThing","top1","top2","top3"].forEach(id=>document.getElementById(id).addEventListener("input",saveToday));
+document.getElementById("moodRow").addEventListener("click",(e)=>{const btn=e.target.closest(".moodBtn");if(!btn)return;document.querySelectorAll("#moodRow .moodBtn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");saveToday()});
+
+document.getElementById("btnBreath").onclick=async()=>{await ensureSW();if(!state.notifEnabled)await requestNotif();startBreathing()};
+document.getElementById("btnGround").onclick=()=>setTab("saude");
+document.getElementById("btnMiniJournal").onclick=()=>setTab("saude");
+document.getElementById("btnSaveMiniJournal").onclick=saveMiniJournal;
+document.getElementById("btnCopyMiniJournal").onclick=copyMiniJournal;
+
+document.querySelectorAll("[data-h]").forEach(p=>p.onclick=()=>{p.classList.toggle("active");togglePill("habits",p.dataset.h)});
+document.querySelectorAll("[data-s]").forEach(p=>p.onclick=()=>{p.classList.toggle("active");togglePill("selfCare",p.dataset.s)});
+
+document.getElementById("btnAddTask").onclick=addTask;
+document.getElementById("taskText").addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();addTask()}});
+document.getElementById("btnAddCoping").onclick=addCoping;
+
+document.getElementById("notes").addEventListener("input",saveToday);
+document.getElementById("diary").addEventListener("input",()=>{state.diaryGlobal=v("diary");save()});
+document.getElementById("btnDiaryToday").onclick=()=>{const now=new Date();const head=`\n\n[${now.toLocaleDateString("pt-BR")}]\n`;const ta=document.getElementById("diary");ta.value=(ta.value||"")+head;state.diaryGlobal=ta.value;save()};
+document.getElementById("btnClearDiary").onclick=()=>{if(confirm("Limpar diário?")){state.diaryGlobal="";document.getElementById("diary").value="";save()}};
+
+document.getElementById("calDate").addEventListener("change",()=>loadCal(v("calDate")));
+document.getElementById("btnSaveCal").onclick=saveCal;
+
+document.getElementById("btnAddAlarm").onclick=async()=>{await ensureSW();if(!state.notifEnabled)await requestNotif();addAlarm()};
+document.getElementById("btnTestNotif").onclick=async()=>{await ensureSW();if(!state.notifEnabled)await requestNotif();await notify("🔔 Teste","Notificação funcionando ✅")};
+document.getElementById("btnAddToCalendar").onclick=addToGoogleCalendar;
+
+["gWater","gMove","gSleep"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{state.goals.water=Number(v("gWater")||0);state.goals.move=Number(v("gMove")||0);state.goals.sleep=Number(v("gSleep")||0);save();renderDashboard()}));
+
+document.getElementById("btnStart").onclick=async()=>{await ensureSW();if(!state.notifEnabled)await requestNotif();pomoStart()};
+document.getElementById("btnPause").onclick=pomoPause;
+document.getElementById("btnReset").onclick=pomoReset;
+document.getElementById("btnShort").onclick=()=>setPomoMinutes(5);
+document.getElementById("btnLong").onclick=()=>setPomoMinutes(15);
+document.getElementById("pomoMin").addEventListener("input",()=>{if(state.pomo.running)return;const min=Number(v("pomoMin")||25);setTimeDisplay(min*60);state.pomo.minutes=min;save()});
+document.getElementById("pomoTopic").addEventListener("input",()=>{state.pomo.topic=v("pomoTopic");save()});
+
+document.getElementById("btnResetAll").onclick=()=>{if(confirm("Apagar tudo?")){localStorage.removeItem(LS_KEY);location.reload()}};
+
+(async function(){
+  load();
+  renderTodayLine();
+  renderVerse();
+  await ensureSW();
+  if("Notification" in window && Notification.permission==="granted"){state.notifEnabled=true;save();}
+
+  document.getElementById("pName").value=state.profile.name||"";
+  document.getElementById("pRoutine").value=state.profile.routine||"";
+  document.getElementById("pGoal").value=state.profile.goal||"";
+  document.getElementById("pCalm").value=state.profile.calm||"";
+  document.getElementById("pName").addEventListener("input",()=>{state.profile.name=v("pName");save()});
+  document.getElementById("pRoutine").addEventListener("input",()=>{state.profile.routine=v("pRoutine");save()});
+  document.getElementById("pGoal").addEventListener("input",()=>{state.profile.goal=v("pGoal");save()});
+  document.getElementById("pCalm").addEventListener("input",()=>{state.profile.calm=v("pCalm");save()});
+
+  document.getElementById("triggers").value=state.triggers||"";
+  document.getElementById("signals").value=state.signals||"";
+  document.getElementById("support1").value=state.support1||"";
+  document.getElementById("support2").value=state.support2||"";
+  ["triggers","signals"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{state[id]=v(id);save()}));
+  ["support1","support2"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{state[id]=v(id);save()}));
+
+  renderCoping();
+  renderTasks();
+  loadTodayUI();
+  renderAlarms();
+  alarmWatcher();
+  renderDashboard();
+  setTab("hoje");
+})();
+</script>
+
+<audio id="alarmSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
+</body>
+</html>
